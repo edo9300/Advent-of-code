@@ -3,16 +3,8 @@ input=io.open("in7.txt")
 functions={}
 vals={}
 
-function getarg(from)
-	local arg=tonumber(from)
-	if not arg then
-		if vals[from] then
-			arg=vals[from]
-		elseif functions[from] then
-			arg=functions[from]()
-		end
-	end
-	return arg
+function getreg(from)
+	return tonumber(from) or vals[from] or (functions[from] and functions[from]())
 end
 
 function setreg(reg,val)
@@ -28,9 +20,9 @@ if input then
 		if string.find(line, "AND") then
 			local from1,from2,to = string.match(line, "(%S+) AND (%S+) %-> (%a+)")
 			setfunc(to,function()
-				local arg1=getarg(from1)
+				local arg1=getreg(from1)
 				if not arg1 then return end
-				local arg2=getarg(from2)
+				local arg2=getreg(from2)
 				if not arg2 then return end
 				setreg(to,arg1&arg2)
 				return vals[to]
@@ -38,9 +30,9 @@ if input then
 		elseif string.find(line, "OR") then
 			local from1,from2,to = string.match(line, "(%S+) OR (%S+) %-> (%a+)")
 			setfunc(to,function()
-				local arg1=getarg(from1)
+				local arg1=getreg(from1)
 				if not arg1 then return end
-				local arg2=getarg(from2)
+				local arg2=getreg(from2)
 				if not arg2 then return end
 				setreg(to,arg1|arg2)
 				return vals[to]
@@ -49,7 +41,7 @@ if input then
 			local from,amount,to = string.match(line, "(%S+) LSHIFT (%d+) %-> (%a+)")
 			local amount=tonumber(amount)
 			setfunc(to,function()
-				local arg=getarg(from)
+				local arg=getreg(from)
 				if not arg then return end
 				setreg(to,(arg<<amount)&0xffff)
 				return vals[to]
@@ -58,7 +50,7 @@ if input then
 			local from,amount,to = string.match(line, "(%S+) RSHIFT (%d+) %-> (%a+)")
 			local amount=tonumber(amount)
 			setfunc(to,function()
-				local arg=getarg(from)
+				local arg=getreg(from)
 				if not arg then return end
 				setreg(to,arg>>amount)
 				return vals[to]
@@ -66,7 +58,7 @@ if input then
 		elseif string.find(line, "NOT") then
 			local from,to = string.match(line, "NOT (%S+) %-> (%a+)")
 			setfunc(to,function()
-				local arg=getarg(from)
+				local arg=getreg(from)
 				if not arg then return end
 				setreg(to,(~arg)&0xffff)
 				return vals[to]
@@ -74,7 +66,7 @@ if input then
 		elseif string.find(line, "->") then
 			local what,to = string.match(line, "(%S+) %-> (%a+)")
 			setfunc(to,function()
-				local arg=getarg(what)
+				local arg=getreg(what)
 				if not arg then return end
 				setreg(to,arg&0xffff)
 				return vals[to]
@@ -83,12 +75,12 @@ if input then
 			print("unrecognized operation: "..line)
 		end
 	end
-	local part1=getarg("a")
+	local part1=getreg("a")
 	print("Part 1: "..part1)
 	vals={}
 	setfunc("b",function()
 				setreg("b",part1)
 				return vals["b"]
 			end)
-	print("Part 2: "..getarg("a"))
+	print("Part 2: "..getreg("a"))
 end
