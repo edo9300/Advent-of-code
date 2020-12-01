@@ -10,36 +10,18 @@ function setdest(city,dest,dist)
 	cities[dest][city]=dist
 end
 
-function copytable(orig)
-	local copy = {}
-	for orig_key, orig_value in pairs(orig) do
-		copy[orig_key] = orig_value
-	end
-    return copy
-end
-
-function findshortest(to_search,prev)
+function tracepath(to_search,prev)
 	local minimum=nil
-	for key,value in pairs(to_search) do
-		to_search[key]=nil
-		local res=((not prev) and 0 or cities[prev][key])+findshortest(to_search,key)
-		to_search[key]=true
-		minimum=(not minimum or res<minimum) and res or minimum
-	end
-	return minimum or 0
-end
-
-function findlongest(to_search,prev)
 	local maximum=nil
-	local iterated=false
 	for key,value in pairs(to_search) do
-		iterated=true
 		to_search[key]=nil
-		local res=((not prev) and 0 or cities[prev][key])+findlongest(to_search,key)
+		local res=((not prev) and 0 or cities[prev][key])
+		local short,long=tracepath(to_search,key)
 		to_search[key]=true
-		maximum=(not maximum or res>maximum) and res or maximum
+		minimum=(not minimum or (res+short)<minimum) and (res+short) or minimum
+		maximum=(not maximum or (res+long)>maximum) and (res+long) or maximum
 	end
-	return maximum or 0
+	return minimum or 0,maximum or 0
 end
 
 if input then
@@ -47,6 +29,7 @@ if input then
 		local start,dest,dist = string.match(line, "(%S+) to (%S+) = (%d+)")
 		setdest(start,dest,tonumber(dist))
 	end
-	print("Part 1: "..findshortest(totcities))
-	print("Part 2: "..findlongest(totcities))
+	local short,long=tracepath(totcities)
+	print("Part 1: "..short)
+	print("Part 2: "..long)
 end
