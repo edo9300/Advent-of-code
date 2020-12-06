@@ -22,9 +22,8 @@ for line in io.open("in6.txt"):lines() do
 	else
 		if not curanswer then
 			curfullanswer={}
-			curanswer={}
+			curanswer=curfullanswer
 			for c in line:gmatch("(.)") do
-				curanswer[c]=true
 				curfullanswer[c]=true
 			end
 		else
