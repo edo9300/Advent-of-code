@@ -1,5 +1,5 @@
 local md5 = require 'md5'
-local input="reyedfim"
+local input=""
 
 local curid=0
 local found=0
