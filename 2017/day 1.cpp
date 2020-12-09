@@ -1,19 +1,23 @@
-#include <iostream>
+#include <fstream>
+#include <string>
 
-#define PART 1
-
-using namespace std;
-
-int main(){
-	FILE* fp = fopen("input1.txt", "r");
-	char input[0x2000];
-	fgets(input, 0x2000, fp);
-	fclose(fp);
-	string str(input);
-	int total=0, jump = (PART == 1) ? 1 : str.length()/2;
-	for (int index = 0; index < str.length(); ++index){
-		if(str[index]==str[(index+jump) % str.length()])
-		total += (str[index] - '0');
+int main() {
+	std::ifstream inputf("in2.txt");
+    inputf.seekg(0, std::ifstream::end);
+    const int length = inputf.tellg();
+    inputf.seekg(0, std::ifstream::beg);
+	std::string str;
+	str.resize(length);
+	inputf.read(&str[0],length);
+	int total1 = 0, total2 = 0;
+	auto check=[&str,&length](int index, int jmp) {
+		const int otherindex=(index+jmp) % length;
+		const char curchar=str[index];
+		return (curchar == str[otherindex]) ? curchar - '0' : 0;
+	};
+	for (int index = 0; index < str.length(); ++index) {
+		total1 += check(index, 1);
+		total2 += check(index, length/2);
 	}
-	cout << total;
+	printf("Part 1: %d\nPart 2: %d\n", total1, total2);
 }

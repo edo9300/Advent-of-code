@@ -1,54 +1,37 @@
-#include <iostream>
 #include <vector>
-#include <string.h>
-
-#define PART2
-
-using namespace std;
+#include <string>
+#include <fstream>
+#include <sstream>
 
 int main(){
-	vector< vector<int> > table;
-	FILE* fp = fopen("input2.txt", "r");
-	char linebuf[0x2000];
-	char* strbuf;
-	int row=0, col=0;
-	while(fgets(linebuf, 0x2000, fp)) {
-		vector<int> row;
-		strbuf = strtok(linebuf,"	");
-		while (strbuf != NULL){
-			int i;
-			sscanf(strbuf, "%d",&i);
-			row.push_back(i);
-			strbuf = strtok (NULL, "	");
-		}
-		table.push_back(row);
+	std::vector<std::vector<int>> table;
+	std::ifstream input("in2.txt");
+	std::string line;
+	while(std::getline(input,line)) {
+		std::istringstream tokenStream(std::move(line));
+		std::vector<int> row;
+		while(std::getline(tokenStream,line,'\t'))
+			row.push_back(static_cast<int>(std::stol(line)));
+		table.push_back(std::move(row));
 	}
-	fclose(fp);
-	int checksum=0;
-	#ifndef PART2
-		for(int i=0; i < table.size(); i++){
-			int min=0, max=0;
-			for(int j =0; j < table[i].size(); j++){
-				if(table[i][j])
-					if(table[i][j]<min || min ==0)
-						min = table[i][j];
-					if(table[i][j]>max)
-						max = table[i][j];    		
+	int checksum1 = 0, checksum2 = 0;
+	for(const auto& tab : table) {
+		int min = INT32_MAX, max = 0;
+		int res = 0;
+		for(int j = 0; j < tab.size(); j++) {
+			if(tab[j]<min)
+				min = tab[j];
+			if(tab[j]>max)
+				max = tab[j];
+			for(int k = 0; res == 0 && k < tab.size(); k++) {
+				if(k != j) {
+					if((tab[j] % tab[k]) == 0)
+						res = tab[j] / tab[k];
+				}
 			}
-			checksum += (max - min);
 		}
-	#else
-		for(int i=0; i < table.size(); i++){			
-			int res = 0;
-			for(int j = 0; j < table[i].size(); j++)
-				for(int k = 0; k < table[i].size(); k++)
-					if(k != j){
-						int division = table[i][j] / table[i][k];
-						if((division * table[i][k]) == table[i][j])
-							res = division;
-					}
-			checksum += res;
-		}
-	#endif
-	cout<<checksum;
+		checksum1 += (max - min);
+		checksum2 += res;
+	}
+	printf("Part 1: %d\nPart 2: %d\n", checksum1, checksum2);
 }
