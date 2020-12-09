@@ -10,9 +10,9 @@ with open("in2.txt") as f:
 		start=int(bounds[0])
 		stop=int(bounds[1])
 		amt=tomatch.count(letter)
-		if amt<=stop and amt>=start:
+		if stop>=amt>=start:
 			valids+=1
-		if ((1 if (tomatch[start]==letter) else 0) + (1 if (tomatch[stop]==letter) else 0))==1:
+		if (tomatch[start]==letter) != (tomatch[stop]==letter):
 			valids2+=1
 print("Part 1",valids)
 print("Part 2",valids2)
