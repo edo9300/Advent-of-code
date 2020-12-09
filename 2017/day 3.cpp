@@ -1,69 +1,45 @@
-#include <iostream>
 #include <cmath>
+#include <cstdio>
 
-#define PART2
-
-using namespace std;
-
-
-int spiral[0x2000][0x2000] = {0};
-
-int spiralMatrix(int x, int y, int step, int count){ //modified version of https://stackoverflow.com/a/46852039
-    int distance = 0;
-    int range = 1;
-    int direction = 0;
-    int total = 1;
-	int i;
-	#ifdef PART2
-    for (i = 0; total < count; i++ ) {
-    #else
-    for (i = 0; i < count; i++ ) {
-    #endif
-        distance++;
-        switch (direction) {
-            case 0:
-                y += step;
-                if ( distance >= range ) {
-                    direction = 1;
-                    distance = 0;
-                }
-                break;
-            case 1:
-                x += step;
-                if (distance >= range) {
-                    direction = 2;
-                    distance = 0;
-                    range += 1;
-                }
-                break;
-            case 2:
-                y -= step;
-                if (distance >= range) {
-                    direction = 3;
-                    distance = 0;
-                }
-                break;
-            case 3:
-                x -= step;
-                if (distance >= range) {
-                    direction = 0;
-                    distance = 0;
-                    range += 1;
-                }
-                break;
-        }
-        spiral[x][y] = spiral[x + 1][y + 1] + spiral[x + 1][y] + spiral[x][y + 1] + spiral[x- 1][y - 1] + spiral[x][y - 1] + spiral[x - 1][y] + spiral[x + 1][y - 1] + spiral[x - 1][y + 1];
-        total = spiral[x][y];
-    }
-	#ifdef PART2
-    return total;
-    #else
-    return abs(x - 0x1000) + abs(y - 0x1000) - 1;
-    #endif
+int part2(int count) {
+	static int spiral[0x500][0x500] = {};
+	spiral[0x280][0x280] = 1;
+	int distance = 0;
+	bool xaxis = false;
+	int x = 0x280;
+	int y = 0x280;
+	int* incremented = &y;
+	int increment = 1;
+	for(int range = 1; spiral[x][y] < count;) {
+		*incremented+=increment;
+		if (++distance >= range) {
+			distance=0;
+			if(xaxis){
+				range++;
+				incremented = &y;
+				increment *= -1;
+			} else {
+				incremented = &x;
+			}
+			xaxis = !xaxis;
+		}
+		spiral[x][y] = spiral[x + 1][y + 1] + spiral[x + 1][y] + spiral[x][y + 1] + spiral[x- 1][y - 1] + spiral[x][y - 1] + spiral[x - 1][y] + spiral[x + 1][y - 1] + spiral[x - 1][y + 1];
+	}
+	return spiral[x][y];
 }
 
-int main(){
-	int input = 289326;
-	spiral[0x1000][0x1000] = 1;
-	cout<<spiralMatrix(0x1000,0x1000,1,input);
+int main(int argc, char** argv){
+	static int input = strtol(argv[1],NULL,10);
+	int part1 = 0;
+	int root = ceil(sqrt(input));
+	if((root%2) != 0)
+		root--;
+	if(root > 0) {
+		const int nextsquare = (root+1)*(root+1);
+		const int previoussquare = (root-1)*(root-1);
+		const int diffquarter=(nextsquare-previoussquare)/4;
+		int mod=abs((diffquarter/2)-((input-previoussquare+(diffquarter-1)+1)%diffquarter));
+		part1=mod+((root)/2);
+	}
+	printf("Part 1: %d\nPart 2: %d\n", part1, part2(input));
 }
