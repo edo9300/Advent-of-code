@@ -8,7 +8,7 @@ sum_string() {
 	echo $total
 }
 
-for line in $(echo $(echo $1 | awk -v RS= -v ORS=':' '1' input1.txt) | tr " " "," | tr ":" " "); do
+for line in $(echo $(awk -v RS= -v ORS=':' '1' input1.txt) | tr " " "," | tr ":" " "); do
 	tot=$(sum_string "$line")
 	total_calories="${total_calories} ${tot}"
 done
