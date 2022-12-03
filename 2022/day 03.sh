@@ -110,10 +110,15 @@ get_priority() {
 }
 
 get_sum_of_priorities() {
+	total=0
 	for line in "$@"; do
-		get_priority $line
+		get_priority "$line"
 		total=$((total + $?))
 	done
+}
+
+write_unique_sorted_to_file() {
+	echo "$@" | tr " " "\n" | sort | uniq > "$file"
 }
 
 split_rucksacks() {
@@ -129,15 +134,32 @@ split_rucksacks() {
 		fi
 		counter=$((counter + 1))
 	done
-	echo $first_half | tr " " "\n" | sort | uniq > /tmp/tmp1
-	echo $second_half | tr " " "\n" | sort | uniq > /tmp/tmp2
-	comm -12 /tmp/tmp1 /tmp/tmp2
+	file=/tmp/aoc_2022_day3_part1_tmp1
+	write_unique_sorted_to_file "$first_half"
+	file=/tmp/aoc_2022_day3_part1_tmp2
+	write_unique_sorted_to_file "$second_half"
+	comm -12 /tmp/aoc_2022_day3_part1_tmp1 /tmp/aoc_2022_day3_part1_tmp2
+}
+
+counter=0
+check_badges_part_2() {
+	total=0
+	file="/tmp/aoc_2022_day3_part2_tmp${counter}"
+	write_unique_sorted_to_file "$@"
+	if [ "$counter" -eq 2 ]; then
+		get_sum_of_priorities $(comm -12 /tmp/aoc_2022_day3_part2_tmp0 /tmp/aoc_2022_day3_part2_tmp1 | comm -12 /tmp/aoc_2022_day3_part2_tmp2 -)
+	fi
+	counter=$(($((counter + 1)) % 3))
 }
 
 
 while read -r line || [ -n "$line" ]; do #Thing needed so that no newline is needed at the end of the input
-	get_sum_of_priorities $(split_rucksacks $(echo $line | fold -w1))
+	word_as_individual_chars=$(echo "$line" | fold -w1)
+	get_sum_of_priorities $(split_rucksacks $word_as_individual_chars)
+	part_1=$((part_1 + total))
+	check_badges_part_2 $word_as_individual_chars
+	part_2=$((part_2 + total))
 done < input3.txt
-echo $total
-rm -f /tmp/tmp1
-rm -f /tmp/tmp2
+echo Part 1: "$part_1"
+echo Part 2: "$part_2"
+rm -f /tmp/aoc_2022_day3_part1_tmp1 /tmp/aoc_2022_day3_part1_tmp2 /tmp/aoc_2022_day3_part2_tmp0 /tmp/aoc_2022_day3_part2_tmp1 /tmp/aoc_2022_day3_part2_tmp2
